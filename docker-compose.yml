@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+# 1. データベースコンテナ
+  mariadb:
+    # ビルドするDockerfile
+    build: ./requirements/mariadb
+    container_name: mariadb
+    # コンテナが落ちた時の再起動
+    restart: always
+    # 接続するネットワーク
+    networks:
+      - inceprion_net
+    # マウントするボリューム
+    volumes:
+      - db_volume:/var/lib/mysql
+
+# 2. Webアプリ&PHPエンジンコンテナ
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: wordpress
+    restart: always
+    networks:
+      - inceprion_net
+    volumes:
+      - web_volume:/var/www/html
+
+# 3. Webサーバーコンテナ
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx
+    restart: always
+    # ホストPCの443番を、コンテナの443番（HTTPS）に繋ぐ
+    ports:
+      - "443:443"
+    networks:
+      - inceprion_net
+    volumes:
+      - web_volume/var/www/html
+
+networks:
+  inceprion_net:
+    driver: bridge
+
+volumes:
+  db_volume:
+  web_volume:

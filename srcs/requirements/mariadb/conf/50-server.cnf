@@ -1,0 +1,9 @@
+[mysqld]
+# データベースのデータが保存される場所
+datadir = /var/lib/mysql
+
+# 受け付けるIPアドレス（0.0.0.0）
+bind_address = 0.0.0.0
+
+# MariaDBが待ち受けるポート番号
+port = 3306
