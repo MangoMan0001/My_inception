@@ -8,22 +8,32 @@ services:
     container_name: mariadb
     # コンテナが落ちた時の再起動
     restart: always
+    # .envの変数をコンテナに渡す
+    env_file: .env
     # 接続するネットワーク
     networks:
-      - inceprion_net
+      - inception_net
     # マウントするボリューム
     volumes:
       - db_volume:/var/lib/mysql
+    # コンテナ内で使用を許可するシークレット
+    secrets:
+      - db_root_password.txt
+      - db_password.txt
 
 # 2. Webアプリ&PHPエンジンコンテナ
   wordpress:
     build: ./requirements/wordpress
     container_name: wordpress
     restart: always
+    env_file: .env
     networks:
-      - inceprion_net
+      - inception_net
     volumes:
       - web_volume:/var/www/html
+    secrets:
+      - db_password.txt
+      - credentials.txt
 
 # 3. Webサーバーコンテナ
   nginx:
@@ -34,14 +44,24 @@ services:
     ports:
       - "443:443"
     networks:
-      - inceprion_net
+      - inception_net
     volumes:
-      - web_volume/var/www/html
+      - web_volume:/var/www/html
+    # NGINXにはDBのパスワード等は不要なため、secretsは渡さない
 
 networks:
-  inceprion_net:
+  inception_net:
     driver: bridge
 
 volumes:
   db_volume:
   web_volume:
+
+# ホストPC上にあるシークレットファイルの実体の場所を定義
+secrets:
+  db_root_password.txt:
+    file: ../secrets/db_root_password.txt
+  db_password.txt:
+    file: ../secrets/db_password.txt
+  credentials.txt:
+    file: ../secrets/credentials.txt
